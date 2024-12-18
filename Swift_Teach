@@ -1,0 +1,218 @@
+//SwiftUI 应用程序开发指南
+
+//应用程序概述
+//本指南说明如何将 SwiftUI 文件组装成一个功能完整的应用程序。该应用程序允许用户：
+
+//查看奖项列表
+//查看单个奖项的详细信息
+//添加新奖项
+//查看奖项统计摘要
+
+
+// ===文件结构===
+
+// 1. <File1>.java
+//此文件定义了表示奖项的 <File1> 结构体。每个奖项都包含：
+
+//<Value1>：唯一标识符（UUID）
+//<Value2>：获奖者姓名
+//<Value3>：比赛名称
+//<Value4>：奖项类型（例如：金奖、银奖、铜奖、优秀奖）
+
+struct <File1> : Identifiable {
+    var <: String = UUID().uuidString
+    var name: String
+    var competition: String 
+    var award: String
+}
+
+
+// 2.AwardManager.java
+
+//此文件管理奖项列表，提供添加、删除和获取奖项的功能：
+
+struct AwardManager {
+    var records: [AwardRecord]
+    
+    init() {
+        self.records = []
+        let award1 = AwardRecord(name: "Kelvin", competition: "WWDC Student Challenge", award: "Winner")
+        let award2 = AwardRecord(name: "Jacky", competition: "HKICT Awards", award: "Bronze")
+        self.records.append(award1)
+        self.records.append(award2)
+    }
+    
+    func count() -> Int {
+        return records.count
+    }
+    
+    mutating func add(_ record: AwardRecord) {
+        records.append(record)
+    }
+    
+    func record(at index: Int) -> AwardRecord {
+        return records[index]
+    }
+    
+    mutating func remove(at index: Int) {
+        records.remove(at: index)
+    }
+}
+
+// 3.ContentView.java
+
+//应用程序的主视图。它：
+
+//使用 List 和 NavigationLink 显示奖项列表
+//提供"摘要"和"添加"功能的按钮（模态视图）
+
+struct ContentView: View {
+    @State var manager = AwardManager()
+    @State private var showAdd = false
+    @State private var showSummary = false
+    
+    var body: some View {
+        NavigationView {
+            VStack {
+                List {
+                    ForEach(0..<manager.count(), id: \.self) { i in
+                        let award = manager.record(at: i)
+                        NavigationLink(destination: DetailView(award: award)) {
+                            HStack {
+                                Text(award.name)
+                                    .font(.headline)
+                                Spacer()
+                                Text(award.award)
+                                    .font(.headline)
+                            }
+                        }
+                    }
+                }
+                .listStyle(PlainListStyle())
+            }
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button(action: { showSummary = true }) {
+                        Text("摘要").font(.headline)
+                    }
+                }
+                ToolbarItem(placement: .principal) {
+                    Text("荣誉记录").font(.headline)
+                }
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button(action: { showAdd = true }) {
+                        Image(systemName: "plus")
+                    }
+                }
+            }
+            .sheet(isPresented: $showAdd) {
+                AddView(showAdd: $showAdd, manager: $manager)
+            }
+            .sheet(isPresented: $showSummary) {
+                SummaryView(manager: manager)
+            }
+        }
+    }
+}
+
+// 4.DetailView.java
+//显示所选奖项的详细信息：
+
+struct DetailView: View {
+    let award: AwardRecord
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Text("姓名: \(award.name)")
+                .font(.title)
+                .fontWeight(.bold)
+            
+            Text("比赛: \(award.competition)")
+                .font(.headline)
+            
+            Text("奖项: \(award.award)")
+                .font(.headline)
+                .foregroundColor(.blue)
+            
+            Spacer()
+        }
+        .padding()
+        .navigationTitle("详情")
+        .navigationBarTitleDisplayMode(.inline)
+    }
+}
+
+// 5.AddView.java
+//提供添加新奖项到列表的用户界面：
+
+struct AddView: View {
+    @Binding var showAdd: Bool
+    @Binding var manager: AwardManager
+    
+    @State private var name: String = ""
+    @State private var competition: String = ""
+    @State private var award: String = ""
+    
+    var body: some View {
+        VStack {
+            HStack {
+                Button(action: {
+                    let newAward = AwardRecord(name: name, competition: competition, award: award.isEmpty ? "优秀奖" : award)
+                    manager.add(newAward)
+                    showAdd = false
+                }) {
+                    Text("添加")
+                }
+                Button(action: {
+                    showAdd = false
+                }) {
+                    Text("取消")
+                }
+                .padding(10)
+            }
+            TextField("姓名", text: $name).textFieldStyle(.roundedBorder).padding(.horizontal)
+            TextField("比赛", text: $competition).textFieldStyle(.roundedBorder).padding(.horizontal)
+            TextField("奖项", text: $award).textFieldStyle(.roundedBorder).padding(.horizontal)
+            Spacer()
+        }
+        .padding()
+    }
+}
+
+// 6.SummaryView.java
+//显示按类型分组的奖项摘要：
+
+struct SummaryView: View {
+    var manager: AwardManager
+    
+    private var goldCount: Int { manager.records.filter { $0.award == "金奖" }.count }
+    private var silverCount: Int { manager.records.filter { $0.award == "银奖" }.count }
+    private var bronzeCount: Int { manager.records.filter { $0.award == "铜奖" }.count }
+    private var meritCount: Int { manager.records.filter { $0.award == "优秀奖" }.count }
+    
+    var body: some View {
+        VStack(spacing: 20) {
+            Text("奖项摘要").font(.largeTitle).fontWeight(.bold).padding(.top)
+            VStack(alignment: .leading) {
+                Text("金奖: \(goldCount)").foregroundColor(.yellow)
+                Text("银奖: \(silverCount)").foregroundColor(.gray)
+                Text("铜奖: \(bronzeCount)").foregroundColor(.brown)
+                Text("优秀奖: \(meritCount)").foregroundColor(.blue)
+            }
+            .padding()
+            Spacer()
+        }
+    }
+}
+
+// 7.app_movApp.swift
+//应用程序的入口点。它启动 ContentView：
+
+@main
+struct app_movApp: App {
+    var body: some Scene {
+        WindowGroup {
+            ContentView()
+        }
+    }
+}
