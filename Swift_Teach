@@ -1,82 +1,74 @@
-//SwiftUI 应用程序开发指南
+SwiftUI App Development Guide
+Overview of the App
+This guide explains how to assemble the SwiftUI files into a fully functional app. The app allows users to:
 
-//应用程序概述
-//本指南说明如何将 SwiftUI 文件组装成一个功能完整的应用程序。该应用程序允许用户：
+View a list of awards.
+See details for individual awards.
+Add new awards.
+View a summary of award statistics.
+File Breakdown
+AwardRecord.swift
+This file defines the AwardRecord struct representing an award. Each award has:
 
-//查看奖项列表
-//查看单个奖项的详细信息
-//添加新奖项
-//查看奖项统计摘要
-
-
-// ===Structure===
-
-// 1. <File1>.java
-//This file defines the <File1> struct representing an award. Each award has:
-
-//<Value1>：A unique identifier (UUID).
-//<Value2>：The recipient's name
-//<Value3>：The competition name.
-//<Value4>：The award type.
-
-struct <File1> : Identifiable {
-    var <Value1> : String = UUID().uuidString
-    var <Value2>: String / Int / Double /  Bool
-    var <Value3>: String / Int / Double /  Bool
-    var <Value4>: String / Int / Double /  Bool
+id: A unique identifier (UUID).
+name: The recipient's name.
+competition: The competition name.
+award: The award type (e.g., Gold, Silver, Bronze, Merit).
+struct AwardRecord: Identifiable {
+    var id: String = UUID().uuidString
+    var name: String
+    var competition: String
+    var award: String
 }
+            
+AwardManager.swift
+This file manages the list of awards and provides functionality to add, remove, and retrieve awards:
 
-
-// 2. <File2>.java
-
-//This file manages the list of awards and provides functionality to add, remove, and retrieve awards:
-
-
-struct <File2> {
+Copy Code
+struct AwardManager {
     var records: [AwardRecord]
-    
+
     init() {
         self.records = []
-        let award1 = AwardRecord(name: "WinnerName1", competition: "Award1", award: "1/2/3")
-        let award2 = AwardRecord(name: "WinnerName2", competition: "Award2", award: "1/2/3")
+        let award1 = AwardRecord(name: "Kelvin", competition: "WWDC Student Challenge", award: "Winner")
+        let award2 = AwardRecord(name: "Jacky", competition: "HKICT Awards", award: "Bronze")
         self.records.append(award1)
         self.records.append(award2)
     }
-    
+
     func count() -> Int {
         return records.count
     }
-    
+
     mutating func add(_ record: AwardRecord) {
         records.append(record)
     }
-    
+
     func record(at index: Int) -> AwardRecord {
         return records[index]
     }
-    
+
     mutating func remove(at index: Int) {
         records.remove(at: index)
     }
 }
+            
+ContentView.swift
+The main view of the app. It:
 
-// 3.ContentView.java
-
-//应用程序的主视图。它：
-
-//使用 List 和 NavigationLink 显示奖项列表
-//提供"摘要"和"添加"功能的按钮（模态视图）
-
+Displays a list of awards using a List and NavigationLink.
+Provides buttons for "Summary" and "Add" features (modals).
+Copy Code
 struct ContentView: View {
     @State var manager = AwardManager()
     @State private var showAdd = false
     @State private var showSummary = false
-    
+
     var body: some View {
         NavigationView {
             VStack {
                 List {
-                    ForEach(0..<manager.count(), id: \.self) { i in
+                    ForEach(0..< manager.count(), id: \.self) { i in
                         let award = manager.record(at: i)
                         NavigationLink(destination: DetailView(award: award)) {
                             HStack {
@@ -94,11 +86,11 @@ struct ContentView: View {
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button(action: { showSummary = true }) {
-                        Text("摘要").font(.headline)
+                        Text("Summary").font(.headline)
                     }
                 }
                 ToolbarItem(placement: .principal) {
-                    Text("荣誉记录").font(.headline)
+                    Text("Honour Records").font(.headline)
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button(action: { showAdd = true }) {
@@ -115,99 +107,102 @@ struct ContentView: View {
         }
     }
 }
+            
+DetailView.swift
+Displays the details of a selected award:
 
-// 4.DetailView.java
-//显示所选奖项的详细信息：
-
+Copy Code
 struct DetailView: View {
     let award: AwardRecord
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text("姓名: \(award.name)")
+            Text("Name: \(award.name)")
                 .font(.title)
                 .fontWeight(.bold)
-            
-            Text("比赛: \(award.competition)")
+
+            Text("Competition: \(award.competition)")
                 .font(.headline)
-            
-            Text("奖项: \(award.award)")
+
+            Text("Award: \(award.award)")
                 .font(.headline)
                 .foregroundColor(.blue)
-            
+
             Spacer()
         }
         .padding()
-        .navigationTitle("详情")
+        .navigationTitle("Detail")
         .navigationBarTitleDisplayMode(.inline)
     }
 }
+            
+AddView.swift
+Provides a UI to add new awards to the list:
 
-// 5.AddView.java
-//提供添加新奖项到列表的用户界面：
-
+Copy Code
 struct AddView: View {
     @Binding var showAdd: Bool
     @Binding var manager: AwardManager
-    
+
     @State private var name: String = ""
     @State private var competition: String = ""
     @State private var award: String = ""
-    
+
     var body: some View {
         VStack {
             HStack {
                 Button(action: {
-                    let newAward = AwardRecord(name: name, competition: competition, award: award.isEmpty ? "优秀奖" : award)
+                    let newAward = AwardRecord(name: name, competition: competition, award: award.isEmpty ? "Merit" : award)
                     manager.add(newAward)
                     showAdd = false
                 }) {
-                    Text("添加")
+                    Text("Add")
                 }
                 Button(action: {
                     showAdd = false
                 }) {
-                    Text("取消")
+                    Text("Cancel")
                 }
                 .padding(10)
             }
-            TextField("姓名", text: $name).textFieldStyle(.roundedBorder).padding(.horizontal)
-            TextField("比赛", text: $competition).textFieldStyle(.roundedBorder).padding(.horizontal)
-            TextField("奖项", text: $award).textFieldStyle(.roundedBorder).padding(.horizontal)
+            TextField("Name", text: $name).textFieldStyle(.roundedBorder).padding(.horizontal)
+            TextField("Competition", text: $competition).textFieldStyle(.roundedBorder).padding(.horizontal)
+            TextField("Award", text: $award).textFieldStyle(.roundedBorder).padding(.horizontal)
             Spacer()
         }
         .padding()
     }
 }
+            
+SummaryView.swift
+Displays a summary of awards grouped by type:
 
-// 6.SummaryView.java
-//显示按类型分组的奖项摘要：
-
+Copy Code
 struct SummaryView: View {
     var manager: AwardManager
-    
-    private var goldCount: Int { manager.records.filter { $0.award == "金奖" }.count }
-    private var silverCount: Int { manager.records.filter { $0.award == "银奖" }.count }
-    private var bronzeCount: Int { manager.records.filter { $0.award == "铜奖" }.count }
-    private var meritCount: Int { manager.records.filter { $0.award == "优秀奖" }.count }
-    
+
+    private var goldCount: Int { manager.records.filter { $0.award == "Gold" }.count }
+    private var silverCount: Int { manager.records.filter { $0.award == "Silver" }.count }
+    private var bronzeCount: Int { manager.records.filter { $0.award == "Bronze" }.count }
+    private var meritCount: Int { manager.records.filter { $0.award == "Merit" }.count }
+
     var body: some View {
         VStack(spacing: 20) {
-            Text("奖项摘要").font(.largeTitle).fontWeight(.bold).padding(.top)
+            Text("Award Summary").font(.largeTitle).fontWeight(.bold).padding(.top)
             VStack(alignment: .leading) {
-                Text("金奖: \(goldCount)").foregroundColor(.yellow)
-                Text("银奖: \(silverCount)").foregroundColor(.gray)
-                Text("铜奖: \(bronzeCount)").foregroundColor(.brown)
-                Text("优秀奖: \(meritCount)").foregroundColor(.blue)
+                Text("Gold: \(goldCount)").foregroundColor(.yellow)
+                Text("Silver: \(silverCount)").foregroundColor(.gray)
+                Text("Bronze: \(bronzeCount)").foregroundColor(.brown)
+                Text("Merit: \(meritCount)").foregroundColor(.blue)
             }
             .padding()
             Spacer()
         }
     }
 }
-
-// 7.app_movApp.swift
-//应用程序的入口点。它启动 ContentView：
+            
+app_movApp.swift
+The app's entry point. It launches ContentView:
 
 @main
 struct app_movApp: App {
@@ -217,3 +212,5 @@ struct app_movApp: App {
         }
     }
 }
+            
+© 2024 SwiftUI App Guide
