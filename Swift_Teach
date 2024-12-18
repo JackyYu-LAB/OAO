@@ -1,12 +1,15 @@
 SwiftUI App Development Guide
+================================================================================================================================
 Overview of the App
 This guide explains how to assemble the SwiftUI files into a fully functional app. The app allows users to:
 
-View a list of awards.
-See details for individual awards.
-Add new awards.
-View a summary of award statistics.
+1.View a list of awards.
+2.See details for individual awards.
+3.Add new awards.
+4.View a summary of award statistics.
+================================================================================================================================
 File Breakdown
+
 AwardRecord.swift
 This file defines the AwardRecord struct representing an award. Each award has:
 
@@ -14,17 +17,18 @@ id: A unique identifier (UUID).
 name: The recipient's name.
 competition: The competition name.
 award: The award type (e.g., Gold, Silver, Bronze, Merit).
+
+
 struct AwardRecord: Identifiable {
     var id: String = UUID().uuidString
     var name: String
     var competition: String
     var award: String
 }
-            
+================================================================================================================================
 AwardManager.swift
 This file manages the list of awards and provides functionality to add, remove, and retrieve awards:
 
-Copy Code
 struct AwardManager {
     var records: [AwardRecord]
 
@@ -52,13 +56,13 @@ struct AwardManager {
         records.remove(at: index)
     }
 }
-            
+================================================================================================================================
 ContentView.swift
-The main view of the app. It:
 
-Displays a list of awards using a List and NavigationLink.
-Provides buttons for "Summary" and "Add" features (modals).
-Copy Code
+The main view of the app. It:
+1.Displays a list of awards using a List and NavigationLink.
+2.Provides buttons for "Summary" and "Add" features (modals).
+
 struct ContentView: View {
     @State var manager = AwardManager()
     @State private var showAdd = false
@@ -107,11 +111,11 @@ struct ContentView: View {
         }
     }
 }
-            
+================================================================================================================================            
 DetailView.swift
+
 Displays the details of a selected award:
 
-Copy Code
 struct DetailView: View {
     let award: AwardRecord
 
@@ -135,11 +139,10 @@ struct DetailView: View {
         .navigationBarTitleDisplayMode(.inline)
     }
 }
-            
+================================================================================================================================
 AddView.swift
 Provides a UI to add new awards to the list:
 
-Copy Code
 struct AddView: View {
     @Binding var showAdd: Bool
     @Binding var manager: AwardManager
@@ -173,11 +176,11 @@ struct AddView: View {
         .padding()
     }
 }
-            
+
+================================================================================================================================
 SummaryView.swift
 Displays a summary of awards grouped by type:
 
-Copy Code
 struct SummaryView: View {
     var manager: AwardManager
 
@@ -200,7 +203,8 @@ struct SummaryView: View {
         }
     }
 }
-            
+
+================================================================================================================================        
 app_movApp.swift
 The app's entry point. It launches ContentView:
 
@@ -213,4 +217,3 @@ struct app_movApp: App {
     }
 }
             
-© 2024 SwiftUI App Guide
