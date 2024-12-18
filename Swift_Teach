@@ -9,35 +9,36 @@
 //查看奖项统计摘要
 
 
-// ===文件结构===
+// ===Structure===
 
 // 1. <File1>.java
-//此文件定义了表示奖项的 <File1> 结构体。每个奖项都包含：
+//This file defines the <File1> struct representing an award. Each award has:
 
-//<Value1>：唯一标识符（UUID）
-//<Value2>：获奖者姓名
-//<Value3>：比赛名称
-//<Value4>：奖项类型（例如：金奖、银奖、铜奖、优秀奖）
+//<Value1>：A unique identifier (UUID).
+//<Value2>：The recipient's name
+//<Value3>：The competition name.
+//<Value4>：The award type.
 
 struct <File1> : Identifiable {
-    var <: String = UUID().uuidString
-    var name: String
-    var competition: String 
-    var award: String
+    var <Value1> : String = UUID().uuidString
+    var <Value2>: String / Int / Double /  Bool
+    var <Value3>: String / Int / Double /  Bool
+    var <Value4>: String / Int / Double /  Bool
 }
 
 
-// 2.AwardManager.java
+// 2. <File2>.java
 
-//此文件管理奖项列表，提供添加、删除和获取奖项的功能：
+//This file manages the list of awards and provides functionality to add, remove, and retrieve awards:
 
-struct AwardManager {
+
+struct <File2> {
     var records: [AwardRecord]
     
     init() {
         self.records = []
-        let award1 = AwardRecord(name: "Kelvin", competition: "WWDC Student Challenge", award: "Winner")
-        let award2 = AwardRecord(name: "Jacky", competition: "HKICT Awards", award: "Bronze")
+        let award1 = AwardRecord(name: "WinnerName1", competition: "Award1", award: "1/2/3")
+        let award2 = AwardRecord(name: "WinnerName2", competition: "Award2", award: "1/2/3")
         self.records.append(award1)
         self.records.append(award2)
     }
