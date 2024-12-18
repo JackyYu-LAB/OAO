@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SwiftUI App Guide</title>
+    <style>
+        /* General styling */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #000000; /* Black background */
+            color: #FFA500; /* Orange text for regular content */
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+        }
+
+        header {
+            text-align: center;
+            padding: 20px;
+            background-color: #1a1a1a;
+            color: #FFA500;
+            border-bottom: 2px solid #FFA500;
+        }
+
+        header h1 {
+            margin: 0;
+        }
+
+        main {
+            padding: 20px;
+        }
+
+        section {
+            margin: 20px 0;
+            padding: 20px;
+            background-color: #1a1a1a; /* Slightly off-black for contrast */
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(255, 165, 0, 0.2);
+        }
+
+        h2, h3 {
+            color: #FFA500; /* Orange headings */
+        }
+
+        p, ul {
+            color: #FFA500; /* Orange for paragraphs and list items */
+        }
+
+        ul {
+            list-style-type: disc;
+            margin-left: 20px;
+        }
+
+        /* Code block styling */
+        code {
+            background-color: #333333; /* Dark gray background for inline code */
+            color: #32CD32; /* Light green for code text */
+            padding: 2px 4px;
+            border-radius: 4px;
+            font-family: Consolas, "Courier New", monospace;
+        }
+
+        pre {
+            background-color: #333333; /* Dark gray background for code blocks */
+            color: #32CD32; /* Light green for code text */
+            padding: 10px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-family: Consolas, "Courier New", monospace;
+            font-size: 14px;
+        }
+
+        footer {
+            text-align: center;
+            padding: 10px;
+            background-color: #1a1a1a;
+            color: #FFA500;
+            border-top: 2px solid #FFA500;
+        }
+
+        @media (max-width: 600px) {
+            body {
+                font-size: 14px;
+            }
+
+            header, footer {
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>SwiftUI App Development Guide</h1>
+    </header>
+    <main>
+        <section>
+            <h2>Overview of the App</h2>
+            <p>This guide explains how to assemble the SwiftUI files into a fully functional app. The app allows users to:</p>
+            <ul>
+                <li>View a list of awards.</li>
+                <li>See details for individual awards.</li>
+                <li>Add new awards.</li>
+                <li>View a summary of award statistics.</li>
+            </ul>
+        </section>
+        
+        <section>
+            <h2>File Breakdown</h2>
+            <h3>AwardRecord.swift</h3>
+            <p>This file defines the <code>AwardRecord</code> struct representing an award. Each award has:</p>
+            <ul>
+                <li><code>id</code>: A unique identifier (UUID).</li>
+                <li><code>name</code>: The recipient's name.</li>
+                <li><code>competition</code>: The competition name.</li>
+                <li><code>award</code>: The award type (e.g., Gold, Silver, Bronze, Merit).</li>
+            </ul>
+            <pre>
+struct AwardRecord: Identifiable {
+    var id: String = UUID().uuidString
+    var name: String
+    var competition: String
+    var award: String
+}
+            </pre>
+        </section>
+
+        <section>
+            <h3>AwardManager.swift</h3>
+            <p>This file manages the list of awards and provides functionality to add, remove, and retrieve awards:</p>
+            <button class="copy-button" onclick="copyCode('code1')">Copy Code</button>
+            <pre id="code1">
+struct AwardManager {
+    var records: [AwardRecord]
+
+    init() {
+        self.records = []
+        let award1 = AwardRecord(name: "Kelvin", competition: "WWDC Student Challenge", award: "Winner")
+        let award2 = AwardRecord(name: "Jacky", competition: "HKICT Awards", award: "Bronze")
+        self.records.append(award1)
+        self.records.append(award2)
+    }
+
+    func count() -> Int {
+        return records.count
+    }
+
+    mutating func add(_ record: AwardRecord) {
+        records.append(record)
+    }
+
+    func record(at index: Int) -> AwardRecord {
+        return records[index]
+    }
+
+    mutating func remove(at index: Int) {
+        records.remove(at: index)
+    }
+}
+            </pre>
+        </section>
+
+        <section>
+            <h3>ContentView.swift</h3>
+            <p>The main view of the app. It:</p>
+            <ul>
+                <li>Displays a list of awards using a <code>List</code> and <code>NavigationLink</code>.</li>
+                <li>Provides buttons for "Summary" and "Add" features (modals).</li>
+            </ul><button class="copy-button" onclick="copyCode('code2')">Copy Code</button>
+            <pre id="code2">
+struct ContentView: View {
+    @State var manager = AwardManager()
+    @State private var showAdd = false
+    @State private var showSummary = false
+
+    var body: some View {
+        NavigationView {
+            VStack {
+                List {
+                    ForEach(0..< manager.count(), id: \.self) { i in
+                        let award = manager.record(at: i)
+                        NavigationLink(destination: DetailView(award: award)) {
+                            HStack {
+                                Text(award.name)
+                                    .font(.headline)
+                                Spacer()
+                                Text(award.award)
+                                    .font(.headline)
+                            }
+                        }
+                    }
+                }
+                .listStyle(PlainListStyle())
+            }
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button(action: { showSummary = true }) {
+                        Text("Summary").font(.headline)
+                    }
+                }
+                ToolbarItem(placement: .principal) {
+                    Text("Honour Records").font(.headline)
+                }
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button(action: { showAdd = true }) {
+                        Image(systemName: "plus")
+                    }
+                }
+            }
+            .sheet(isPresented: $showAdd) {
+                AddView(showAdd: $showAdd, manager: $manager)
+            }
+            .sheet(isPresented: $showSummary) {
+                SummaryView(manager: manager)
+            }
+        }
+    }
+}
+            </pre>
+        </section>
+
+        <section>
+            <h3>DetailView.swift</h3>
+            <p>Displays the details of a selected award:</p><button class="copy-button" onclick="copyCode('code3')">Copy Code</button>
+            <pre id="code3">
+struct DetailView: View {
+    let award: AwardRecord
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Text("Name: \(award.name)")
+                .font(.title)
+                .fontWeight(.bold)
+
+            Text("Competition: \(award.competition)")
+                .font(.headline)
+
+            Text("Award: \(award.award)")
+                .font(.headline)
+                .foregroundColor(.blue)
+
+            Spacer()
+        }
+        .padding()
+        .navigationTitle("Detail")
+        .navigationBarTitleDisplayMode(.inline)
+    }
+}
+            </pre>
+        </section>
+
+        <section>
+            <h3>AddView.swift</h3>
+            <p>Provides a UI to add new awards to the list:</p><button class="copy-button" onclick="copyCode('code4')">Copy Code</button>
+            <pre id="code4">
+struct AddView: View {
+    @Binding var showAdd: Bool
+    @Binding var manager: AwardManager
+
+    @State private var name: String = ""
+    @State private var competition: String = ""
+    @State private var award: String = ""
+
+    var body: some View {
+        VStack {
+            HStack {
+                Button(action: {
+                    let newAward = AwardRecord(name: name, competition: competition, award: award.isEmpty ? "Merit" : award)
+                    manager.add(newAward)
+                    showAdd = false
+                }) {
+                    Text("Add")
+                }
+                Button(action: {
+                    showAdd = false
+                }) {
+                    Text("Cancel")
+                }
+                .padding(10)
+            }
+            TextField("Name", text: $name).textFieldStyle(.roundedBorder).padding(.horizontal)
+            TextField("Competition", text: $competition).textFieldStyle(.roundedBorder).padding(.horizontal)
+            TextField("Award", text: $award).textFieldStyle(.roundedBorder).padding(.horizontal)
+            Spacer()
+        }
+        .padding()
+    }
+}
+            </pre>
+        </section>
+
+        <section>
+            <h3>SummaryView.swift</h3>
+            <p>Displays a summary of awards grouped by type:</p><button class="copy-button" onclick="copyCode('code5')">Copy Code</button>
+            <pre id="code5">
+struct SummaryView: View {
+    var manager: AwardManager
+
+    private var goldCount: Int { manager.records.filter { $0.award == "Gold" }.count }
+    private var silverCount: Int { manager.records.filter { $0.award == "Silver" }.count }
+    private var bronzeCount: Int { manager.records.filter { $0.award == "Bronze" }.count }
+    private var meritCount: Int { manager.records.filter { $0.award == "Merit" }.count }
+
+    var body: some View {
+        VStack(spacing: 20) {
+            Text("Award Summary").font(.largeTitle).fontWeight(.bold).padding(.top)
+            VStack(alignment: .leading) {
+                Text("Gold: \(goldCount)").foregroundColor(.yellow)
+                Text("Silver: \(silverCount)").foregroundColor(.gray)
+                Text("Bronze: \(bronzeCount)").foregroundColor(.brown)
+                Text("Merit: \(meritCount)").foregroundColor(.blue)
+            }
+            .padding()
+            Spacer()
+        }
+    }
+}
+            </pre>
+        </section>
+
+        <section>
+            <h3>app_movApp.swift</h3>
+            <p>The app's entry point. It launches <code>ContentView</code>:</p>
+            <pre>
+@main
+struct app_movApp: App {
+    var body: some Scene {
+        WindowGroup {
+            ContentView()
+        }
+    }
+}
+            </pre>
+        </section>
+    </main>
+    <footer>
+        <p>© 2024 SwiftUI App Guide</p>
+    </footer>
+    <script>
+        // Function to copy code to clipboard
+        function copyCode(id) {
+            const codeBlock = document.getElementById(id).innerText;
+            navigator.clipboard.writeText(codeBlock).then(() => {
+                ;
+            }).catch(err => {
+                ;
+            });
+        }
+      </script>
+</body>
+</html>
