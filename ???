@@ -228,9 +228,309 @@ struct GroupingView: View {
         group.map { $0.name }.joined(separator: ", ")
     }
 
-=======================================================================================
 
     private func performGrouping() {
         // Implement grouping logic here
+    }
+}
+=======================================================================================
+
+
+
+Student.swift:
+swift
+
+Copy
+struct Student: Identifiable {
+    var id: String = UUID().uuidString
+    var name: String
+    var programme: String
+}
+
+=======================================================================================
+
+StudentManager.swift:
+swift
+
+Copy
+struct StudentManager {
+    fileprivate var students: [Student] = []
+    
+    init() {
+        let student1 = Student(name: "CC Lui", programme: "AIMAD")
+        let student2 = Student(name: "KC Cheung", programme: "SE")
+        let student3 = Student(name: "Marcus Kwok", programme: "AIMAD")
+        let student4 = Student(name: "Frieda Lee", programme: "SE")
+        let student5 = Student(name: "Cheng Lok Lok", programme: "AIMAD")
+        
+        self.students = [student1, student2, student3, student4, student5]
+    }
+    
+    func getCount() -> Int {
+        return students.count
+    }
+    
+    func getStudent(at index: Int) -> Student {
+        return students[index]
+    }
+    
+    mutating func add(_ student: Student) {
+        students.append(student)
+    }
+    
+    mutating func remove(at index: Int) {
+        students.remove(at: index)
+    }
+    
+    func getStudents() -> [Student] {
+        return students
+    }
+}
+
+=======================================================================================
+
+ContentView.swift:
+swift
+
+Copy
+import SwiftUI
+
+struct ContentView: View {
+    @State var manager = StudentManager()
+    @State var showAdd = false
+    @State var showGroup = false
+    
+    var body: some View {
+        NavigationView {
+            VStack {
+                List {
+                    ForEach(0..<manager.getCount(), id: \.self) { i in
+                        let student = manager.getStudent(at: i)
+                        NavigationLink(destination: DetailView(student: student)) {
+                            Text(student.name)
+                        }
+                    }
+                    .onDelete { indexSet in
+                        indexSet.forEach { index in
+                            manager.remove(at: index)
+                        }
+                    }
+                }
+                .listStyle(.grouped)
+            }
+            .navigationTitle("Student List")
+            .toolbar {
+                ToolbarItem(content: {
+                    HStack {
+                        Button("Group Now!") {
+                            showGroup = true
+                        }
+                        Button("+") {
+                            showAdd = true
+                        }
+                    }
+                })
+            }
+            .sheet(isPresented: $showAdd) {
+                AddView(showAdd: $showAdd, manager: $manager)
+            }
+            .sheet(isPresented: $showGroup) {
+                GroupingView(manager: $manager, showGroup: $showGroup)
+            }
+        }
+    }
+}
+
+=======================================================================================
+
+
+AddView.swift:
+swift
+
+Copy
+import SwiftUI
+
+struct AddView: View {
+    @Binding var showAdd: Bool
+    @Binding var manager: StudentManager
+    
+    @State var name: String = ""
+    @State var programme: String = ""
+    
+    var body: some View {
+        VStack {
+            Text("Add New Student").bold()
+            
+            TextField("Name", text: $name)
+                .textFieldStyle(.roundedBorder)
+            
+            TextField("Programme", text: $programme)
+                .textFieldStyle(.roundedBorder)
+            
+            Text("For programme, please enter either AIMAD, SE, GA or MM only!")
+                .font(.footnote)
+                .foregroundStyle(.gray)
+            
+            if !isValid {
+                Text("All textfields must not be empty")
+                    .font(.footnote)
+                    .foregroundStyle(.red)
+            }
+            
+            Spacer()
+            
+            HStack {
+                Button(action: {
+                    if isValid {
+                        manager.add(Student(name: name, programme: programme))
+                        showAdd = false
+                    }
+                }, label: {
+                    Spacer()
+                    Text("Add")
+                    Spacer()
+                })
+                .frame(height: 50)
+                .buttonStyle(.bordered)
+                .padding(10)
+                
+                Button(action: {
+                    showAdd = false
+                }, label: {
+                    Spacer()
+                    Text("Cancel")
+                    Spacer()
+                })
+                .frame(height: 50)
+                .buttonStyle(.bordered)
+                .padding(10)
+            }
+        }
+        .padding()
+    }
+    
+    var isValid: Bool {
+        return name.count > 0 && programme.count > 0
+    }
+}
+
+=======================================================================================
+
+DetailView.swift:
+swift
+
+Copy
+import SwiftUI
+
+struct DetailView: View {
+    var student: Student
+    
+    var body: some View {
+        VStack {
+            Text(student.name)
+                .font(.title)
+                .padding()
+            
+            Text(getProgrammeIcon())
+                .font(.system(size: 50))
+        }
+    }
+    
+    func getProgrammeIcon() -> String {
+        switch student.programme {
+        case "AIMAD":
+            return "🤖"
+        case "SE":
+            return "💻"
+        case "MM":
+            return "🎨"
+        case "GA":
+            return "🎮"
+        default:
+            return ""
+        }
+    }
+}
+=======================================================================================
+
+GroupingView.swift:
+swift
+
+Copy
+import SwiftUI
+
+struct GroupingView: View {
+    @Binding var manager: StudentManager
+    @Binding var showGroup: Bool
+    @State private var groups: [[Student]] = []
+    @State private var unassignedStudents: [Student] = []
+    @State private var showingGroups: Int = 0
+    
+    var body: some View {
+        VStack {
+            Text("Grouping!")
+                .font(.title)
+            
+            if unassignedStudents.count >= 2 {
+                Text("\(unassignedStudents.count) students left")
+                Button("Group Now!") {
+                    performGrouping()
+                }
+            } else {
+                Text("Not enough student left for grouping!")
+            }
+            
+            Divider()
+            
+            List {
+                ForEach(0..<showingGroups, id: \.self) { index in
+                    if index < groups.count {
+                        Text("Group \(index + 1): \(groupMemberNames(for: groups[index]))")
+                    }
+                }
+            }
+            .listStyle(.plain)
+        }
+        .padding()
+        .onAppear {
+            unassignedStudents = manager.getStudents()
+        }
+    }
+    
+    private func groupMemberNames(for group: [Student]) -> String {
+        group.map { $0.name }.joined(separator: ", ")
+    }
+    
+    private func performGrouping() {
+        groups.removeAll()
+        var students = unassignedStudents
+        
+        while students.count >= 2 {
+            if students.count <= 3 {
+                groups.append(students)
+                students.removeAll()
+            } else {
+                let randomIndex1 = Int.random(in: 0..<students.count)
+                let student1 = students.remove(at: randomIndex1)
+                let randomIndex2 = Int.random(in: 0..<students.count)
+                let student2 = students.remove(at: randomIndex2)
+                groups.append([student1, student2])
+            }
+        }
+        
+        unassignedStudents = students
+        
+        // Animate groups appearing
+        withAnimation {
+            showingGroups = 0
+        }
+        
+        for i in 0..<groups.count {
+            DispatchQueue.main.asyncAfter(deadline: .now() + Double(i) * 0.5) {
+                withAnimation {
+                    showingGroups += 1
+                }
+            }
+        }
     }
 }
