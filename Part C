@@ -1,0 +1,344 @@
+Certainly! Below is the **full implementation of code with comments added as hints** for each task and step. These hints will guide you through the purpose of each section of the code.
+
+---
+
+### **1. Attendance.swift**
+The `Attendance` struct represents a single attendance record.
+
+```swift
+import Foundation
+
+// Task: Define the Attendance data model
+struct Attendance: Identifiable {
+    // Each attendance has a unique identifier
+    var id: String = UUID().uuidString
+
+    // Task: Define properties for subject name and attendance minutes
+    var subject: String
+    var minutes: Int
+}
+```
+
+---
+
+### **2. AttendanceManager.swift**
+The `AttendanceManager` struct manages the attendance data and provides utility methods.
+
+```swift
+import Foundation
+
+// Task: Define the AttendanceManager to manage attendance records
+struct AttendanceManager {
+    // Task: Store an array of attendance records
+    fileprivate var attendances: [Attendance] = []
+
+    // Task: Preload some data into the manager
+    init() {
+        let result1 = Attendance(subject: "ITP4206", minutes: 180)
+        let result2 = Attendance(subject: "ITP4221", minutes: 120)
+        let result3 = Attendance(subject: "ITP4221", minutes: 118)
+        let result4 = Attendance(subject: "ITP4206", minutes: 90)
+        let result5 = Attendance(subject: "ITP4221", minutes: 89)
+        let result6 = Attendance(subject: "ITP4909", minutes: 78)
+        
+        // Add these preloaded records to the attendances array
+        self.attendances = [result1, result2, result3, result4, result5, result6]
+    }
+
+    // Task A: Return the total number of attendance records
+    func getCount() -> Int {
+        return attendances.count
+    }
+
+    // Task B: Retrieve a specific attendance record by its index
+    func getAttendance(at index: Int) -> Attendance {
+        return attendances[index]
+    }
+
+    // Task C: Add a new attendance record to the list
+    mutating func add(_ attendance: Attendance) {
+        attendances.append(attendance)
+    }
+
+    // Task D: Remove an attendance record at a specific index
+    mutating func remove(at index: Int) {
+        attendances.remove(at: index)
+    }
+
+    // Task E: Return the full list of attendance records
+    func getAttendances() -> [Attendance] {
+        return attendances
+    }
+}
+```
+
+---
+
+### **3. ContentView.swift**
+This is the main page (Attendance List Page) that displays the list of attendance records, and allows navigation to other pages.
+
+```swift
+import SwiftUI
+
+struct ContentView: View {
+    // Task A: Create a state variable to manage the attendance records
+    @State var manager = AttendanceManager()
+    
+    // Task A (2b): Add two state variables to handle showing the Add Page and Attendance Page
+    @State var showAdd = false
+    @State var showAttendance = false
+
+    var body: some View {
+        // Task B: Use NavigationView to wrap the content for navigation support
+        NavigationView {
+            // Task C: Use VStack to stack the content vertically
+            VStack {
+                // Task D: Display the attendance records in a List
+                List {
+                    // Use ForEach to iterate through the attendance records
+                    ForEach(0..<manager.getCount(), id: \.self) { i in
+                        // Task E: Retrieve the attendance record at the current index
+                        let result = manager.getAttendance(at: i)
+                        
+                        // Task A (3b): Use NavigationLink to navigate to the Detail Page
+                        NavigationLink(destination: DetailView(result: result)) {
+                            // Task F: Display the subject name and attendance minutes
+                            Text("\(result.subject): \(result.minutes) minutes")
+                        }
+                    }
+                }
+                // Task G: Set the navigation title for the page
+                .navigationTitle("Attendance List")
+                
+                // Task H: Add buttons in the navigation bar
+                .toolbar {
+                    ToolbarItem(placement: .navigationBarTrailing) {
+                        Button(action: {
+                            showAdd = true // Show the Add Page
+                        }) {
+                            Text("+")
+                        }
+                    }
+                    ToolbarItem(placement: .navigationBarLeading) {
+                        Button(action: {
+                            showAttendance = true // Show the Attendance Page
+                        }) {
+                            Text("See Attendance!")
+                        }
+                    }
+                }
+                // Task B (2b): Present the Add Page when showAdd is true
+                .sheet(isPresented: $showAdd) {
+                    AddView(showAdd: $showAdd, manager: $manager)
+                }
+                // Task A (4b): Present the Attendance Page when showAttendance is true
+                .sheet(isPresented: $showAttendance) {
+                    AttendanceView(manager: $manager)
+                }
+            }
+        }
+    }
+}
+
+struct ContentView_Previews: PreviewProvider {
+    static var previews: some View {
+        ContentView()
+    }
+}
+```
+
+---
+
+### **4. AddView.swift**
+This page allows the user to add a new attendance record.
+
+```swift
+import SwiftUI
+
+struct AddView: View {
+    // Task: Use bindings to communicate with the ContentView
+    @Binding var showAdd: Bool
+    @Binding var manager: AttendanceManager
+
+    // Task A: Define two state variables for user input (subject and minutes)
+    @State var subject: String = ""
+    @State var minutes: String = "" // Stored as a string to validate input
+
+    var body: some View {
+        VStack {
+            Text("Add New Record").bold()
+            
+            // Task B: Add a TextField for the subject
+            TextField("Subject", text: $subject)
+                .textFieldStyle(.roundedBorder)
+            
+            // Task B: Add a TextField for the minutes
+            TextField("Minutes", text: $minutes)
+                .textFieldStyle(.roundedBorder)
+                .keyboardType(.numberPad)
+            
+            // Task D: Show an error message if input is invalid
+            if !isValid {
+                Text("All fields must be filled, and minutes must be a number!")
+                    .font(.footnote)
+                    .foregroundColor(.red)
+            }
+            
+            Spacer()
+            
+            // Add buttons for "Add" and "Cancel" actions
+            HStack {
+                Button(action: {
+                    // Task D: Perform validation and add the new attendance
+                    if isValid {
+                        manager.add(Attendance(subject: subject, minutes: Int(minutes)!))
+                        showAdd = false // Go back to the ContentView
+                    }
+                }) {
+                    Spacer()
+                    Text("Add")
+                    Spacer()
+                }
+                .frame(height: 50)
+                .buttonStyle(.bordered)
+                .padding(10)
+                
+                Button(action: {
+                    // Task E: Close the Add Page without saving
+                    showAdd = false
+                }) {
+                    Spacer()
+                    Text("Cancel")
+                    Spacer()
+                }
+                .frame(height: 50)
+                .buttonStyle(.bordered)
+                .padding(10)
+            }
+        }
+        .padding()
+    }
+
+    // Task F: Validate the user input
+    var isValid: Bool {
+        if let minutesValue = Int(minutes), !subject.isEmpty, minutesValue > 0 {
+            return true
+        }
+        return false
+    }
+}
+
+struct AddView_Previews: PreviewProvider {
+    @State static var manager = AttendanceManager()
+    @State static var showAdd = false
+
+    static var previews: some View {
+        AddView(showAdd: $showAdd, manager: $manager)
+    }
+}
+```
+
+---
+
+### **5. DetailView.swift**
+This page shows detailed information about a selected attendance record.
+
+```swift
+import SwiftUI
+
+struct DetailView: View {
+    // Task: Accept the attendance record as a parameter
+    var result: Attendance
+
+    var body: some View {
+        VStack {
+            // Task A: Display the subject name
+            Text("Subject: \(result.subject)")
+                .font(.title2)
+            
+            // Task A: Display the attendance minutes
+            Text("Minutes: \(result.minutes)")
+                .font(.title3)
+            
+            // Task B: Calculate and display the contribution percentage
+            Text("Contribution: \(String(format: "%.2f", calculateContribution()))%")
+                .font(.title3)
+        }
+        .padding()
+    }
+
+    // Task B: Calculate the attendance contribution percentage
+    func calculateContribution() -> Double {
+        return (Double(result.minutes) / 2340) * 100
+    }
+}
+
+struct DetailView_Previews: PreviewProvider {
+    static var previews: some View {
+        DetailView(result: Attendance(subject: "ITP4206", minutes: 180))
+    }
+}
+```
+
+---
+
+### **6. AttendanceView.swift**
+This page calculates the attendance percentage for each subject.
+
+```swift
+import SwiftUI
+
+struct AttendanceView: View {
+    @Binding var manager: AttendanceManager
+    @State private var showResults: Bool = false
+
+    var body: some View {
+        VStack {
+            Text("Attendance!").font(.title)
+            
+            // Task: Display the appropriate status message
+            if manager.getCount() == 0 {
+                Text("No Attendance to Show!")
+                    .foregroundColor(.red)
+            } else if !showResults {
+                Text("Please click calculate Attendance")
+                    .foregroundColor(.gray)
+            } else {
+                Text("Your Attendance:")
+            }
+
+            Button(action: {
+                // Task: Toggle the results display
+                showResults.toggle()
+            }) {
+                Text("Calculate Attendance")
+            }
+            .buttonStyle(.borderedProminent)
+            .padding()
+
+            Divider()
+            
+            // Task: Show the attendance results in a List
+            if showResults {
+                List(manager.getAttendances()) { attendance in
+                    Text("\(attendance.subject): \(String(format: "%.2f", Double(attendance.minutes) / 2340 * 100))%")
+                }
+                .listStyle(.plain)
+            }
+        }
+        .padding()
+    }
+}
+
+struct AttendanceView_Previews: PreviewProvider {
+    @State static var manager = AttendanceManager()
+
+    static var previews: some View {
+        AttendanceView(manager: $manager)
+    }
+}
+```
+
+---
+
+This implementation includes **all required hints** for each task. Each comment explains what the code is doing and how it relates to the project requirements.
