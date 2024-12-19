@@ -288,11 +288,6 @@ struct StudentManager {
 }
 
 =======================================================================================
-
-ContentView.swift:
-swift
-
-Copy
 import SwiftUI
 
 struct ContentView: View {
@@ -320,16 +315,23 @@ struct ContentView: View {
             }
             .navigationTitle("Student List")
             .toolbar {
-                ToolbarItem(content: {
-                    HStack {
-                        Button("Group Now!") {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    HStack(spacing: 15) {
+                        Button(action: {
                             showGroup = true
+                        }) {
+                            Text("Group Now!")
+                                .foregroundColor(.blue)
                         }
-                        Button("+") {
+                        
+                        Button(action: {
                             showAdd = true
+                        }) {
+                            Image(systemName: "plus")
+                                .foregroundColor(.blue)
                         }
                     }
-                })
+                }
             }
             .sheet(isPresented: $showAdd) {
                 AddView(showAdd: $showAdd, manager: $manager)
@@ -338,6 +340,12 @@ struct ContentView: View {
                 GroupingView(manager: $manager, showGroup: $showGroup)
             }
         }
+    }
+}
+
+struct ContentView_Preview: PreviewProvider {
+    static var previews: some View {
+        ContentView()
     }
 }
 
