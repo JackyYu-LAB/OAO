@@ -1,203 +1,194 @@
-// Student.swift
-struct Student: Identifiable {
-    var id: String = UUID().uuidString
-    var name: String
-    var programme: String
+For StudentManager.swift:
+swift
+
+Copy
+//TASK A: - return the number of the students Array
+// Suggestion: Simply return students.count to get the total number of students in the array
+return students.count
+
+//TASK B: return the student instance at the given index in students array
+// Suggestion: Use array indexing to return the student at the specified index
+return students[index]
+
+//TASK C: define the function mutating func add(_ student : Student)
+//function: append the student into the students array
+// Suggestion: Define as:
+mutating func add(_ student: Student) {
+    students.append(student)
 }
 
-// StudentManager.swift
-struct StudentManager {
-    fileprivate var students: [Student] = []
-    
-    init() {
-        let student1 = Student(name: "CC Lui", programme: "AIMAD")
-        let student2 = Student(name: "KC Cheung", programme: "SE")
-        let student3 = Student(name: "Marcus Kwok", programme: "AIMAD")
-        let student4 = Student(name: "Frieda Lee", programme: "SE")
-        let student5 = Student(name: "Cheng Lok Lok", programme: "AIMAD")
-        
-        self.students = [student1, student2, student3, student4, student5]
-    }
-    
-    func getCount() -> Int {
-        return students.count
-    }
-    
-    func getStudent(at index: Int) -> Student {
-        return students[index]
-    }
-    
-    mutating func add(_ student: Student) {
-        students.append(student)
-    }
-    
-    mutating func remove(at index: Int) {
-        students.remove(at: index)
-    }
-    
-    func getStudents() -> [Student] {
-        return students
-    }
+//TASK D: define a mutating function remove, it accepts 1 int parameter named index
+//function: remove the element in students at the given index by students.remove(at: index)
+// Suggestion: Define as:
+mutating func remove(at index: Int) {
+    students.remove(at: index)
 }
 
-
-
-
-// ContentView.swift
-import SwiftUI
-
-struct ContentView: View {
-    @State var manager = StudentManager()
-    @State var showAdd = false
-    @State var showGroup = false
-    
-    var body: some View {
-        NavigationView {
-            VStack {
-                List {
-                    ForEach(0..<manager.getCount(), id: \.self) { i in
-                        let student = manager.getStudent(at: i)
-                        NavigationLink(destination: DetailView(student: student)) {
-                            Text(student.name)
-                        }
-                    }
-                    .onDelete { indexSet in
-                        for index in indexSet {
-                            manager.remove(at: index)
-                        }
-                    }
-                }
-            }
-            .navigationTitle("Student List")
-            .toolbar {
-                ToolbarItem(content: {
-                    HStack {
-                        Button("Group Now!") {
-                            showGroup = true
-                        }
-                        Button("+") {
-                            showAdd = true
-                        }
-                    }
-                })
-            }
-            .sheet(isPresented: $showAdd) {
-                AddView(showAdd: $showAdd, manager: $manager)
-            }
-            .sheet(isPresented: $showGroup) {
-                GroupingView(manager: $manager, showGroup: $showGroup)
-            }
-        }
-    }
+//TASK E: define the function name getStudents
+//function: The function will return the students array
+// Suggestion: Define as:
+func getStudents() -> [Student] {
+    return students
 }
 
+=======================================================================================
 
 
-// AddView.swift
-import SwiftUI
+For ContentView.swift tasks:
+swift
 
-struct AddView: View {
-    @Binding var showAdd: Bool
-    @Binding var manager: StudentManager
-    
-    @State var name: String = ""
-    @State var programme: String = ""
-    
-    var body: View {
-        VStack {
-            Text("Add New Student")
-                .bold()
-            
-            TextField("Name", text: $name)
-                .textFieldStyle(.roundedBorder)
-            
-            TextField("Programme", text: $programme)
-                .textFieldStyle(.roundedBorder)
-            
-            Text("For programme, please enter either AIMAD, SE, GA or MM only!")
-                .font(.footnote)
-                .foregroundStyle(.gray)
-            
-            if !isValid {
-                Text("All textfields must not be empty")
-                    .font(.footnote)
-                    .foregroundStyle(.red)
-            }
-            
-            Spacer()
-            
-            HStack {
-                Button(action: {
-                    if isValid {
-                        let newStudent = Student(name: name, programme: programme)
-                        manager.add(newStudent)
-                        showAdd = false
-                    }
-                }, label: {
-                    Spacer()
-                    Text("Add")
-                    Spacer()
-                })
-                .frame(height: 50)
-                .buttonStyle(.bordered)
-                .padding(10)
-                
-                Button(action: {
-                    showAdd = false
-                }, label: {
-                    Spacer()
-                    Text("Cancel")
-                    Spacer()
-                })
-                .frame(height: 50)
-                .buttonStyle(.bordered)
-                .padding(10)
-            }
-        }
-        .padding()
-    }
-    
-    var isValid: Bool {
-        return name.count > 0 && programme.count > 0
+Copy
+//TASK A - Define a state (a variable named manager) using @State
+//Create and assign an instance of StudentManager() into it
+// Suggestion:
+@State var manager = StudentManager()
+
+//TASK B - Use a NavigationView / NavigationTack to wrap the content
+// Suggestion: Replace [SwiftUI Element A] with:
+NavigationView
+
+//TASK C - Use a VStack to wrap the content
+// Suggestion: Replace [SwiftUI Element B] with:
+VStack
+
+//TASK D - Use a List to wrap the content
+// Suggestion: Replace [SwiftUI Element C] with:
+List
+
+//Task E - Get a instance of student
+// Suggestion:
+let student = manager.getStudent(at: i)
+
+//Task F - Make a Text element to display the student name
+// Suggestion:
+Text(student.name)
+
+//TASK G - Use the .navigationTitle modifier to change the title
+// Suggestion:
+.navigationTitle("Student List")
+
+//TASK H - Use two buttons showing "Group Now!" and "+"
+// Suggestion:
+Button("Group Now!") {
+    showGroup = true
+}
+Button("+") {
+    showAdd = true
+}
+
+=======================================================================================
+
+Here are the suggestions for AddView.swift tasks:
+swift
+
+Copy
+//TASK A: - create two states, var name : String and var programme : String with @State
+// Suggestion:
+@State var name: String = ""
+@State var programme: String = ""
+
+//TASK B: - create the TWO textfields
+// Suggestion:
+TextField("Name", text: $name)
+    .textFieldStyle(.roundedBorder)
+TextField("Programme", text: $programme)
+    .textFieldStyle(.roundedBorder)
+
+//TASK C: - create the Text elements
+// Suggestion:
+Text("For programme, please enter either AIMAD, SE, GA or MM only!")
+    .font(.footnote)
+    .foregroundStyle(.gray)
+
+//TASK D: - create the Text elements (error message)
+// Suggestion:
+Text("All textfields must not be empty")
+    .font(.footnote)
+    .foregroundStyle(.red)
+
+//TASK D: - complete the validation and functionalities
+// Suggestion:
+if isValid {
+    manager.add(Student(name: name, programme: programme))
+    showAdd = false
+}
+
+//TASK E: - complete the functionalities
+// Suggestion:
+showAdd = false
+
+//TASK F: - if the name.count > 0 and programme.count > 0 , then return true
+// Suggestion:
+return name.count > 0 && programme.count > 0
+
+=======================================================================================
+
+For DetailView.swift tasks:
+swift
+
+Copy
+//TASK A: - Define Two Text Elements and Show the information correctly
+// Suggestion:
+Text(student.name)
+    .font(.title)
+    .padding()
+Text(getProgrammeIcon())
+    .font(.system(size: 50))
+
+//TASK B: - COMPLETE the getProgrammeIcon() function
+// Suggestion:
+func getProgrammeIcon() -> String {
+    switch student.programme {
+    case "AIMAD":
+        return "🤖"
+    case "SE":
+        return "💻"
+    case "MM":
+        return "🎨"
+    case "GA":
+        return "🎮"
+    default:
+        return ""
     }
 }
 
-// DetailView.swift
-import SwiftUI
 
-struct DetailView: View {
-    var student: Student
-    
-    var body: some View {
-        VStack {
-            Text(student.name)
-                .font(.title)
-                .padding()
-            
-            Text(getProgrammeIcon())
-                .font(.system(size: 50))
-        }
-    }
-    
-    func getProgrammeIcon() -> String {
-        switch student.programme {
-        case "AIMAD":
-            return "🤖"
-        case "SE":
-            return "💻"
-        case "MM":
-            return "🎨"
-        case "GA":
-            return "🎮"
-        default:
-            return ""
-        }
-    }
+=======================================================================================
+
+
+For ContentView additional tasks:
+swift
+
+Copy
+//TASK A (2b) - Define two states (variable named showAdd and showGroup) using @State
+// Suggestion:
+@State var showAdd = false
+@State var showGroup = false
+
+//TASK B (2b) - Use .sheet modifier, bind with showAdd State
+// Suggestion:
+.sheet(isPresented: $showAdd) {
+    AddView(showAdd: $showAdd, manager: $manager)
 }
 
-// GroupingView.swift
-import SwiftUI
+//TASK A (3b) - Use navigation link to establish a link to detail view
+// Suggestion:
+NavigationLink(destination: DetailView(student: student)) {
+    Text(student.name)
+}
 
+//TASK A (4b) - Use .sheet modifier, bind with showGrouping State
+// Suggestion:
+.sheet(isPresented: $showGroup) {
+    GroupingView(manager: $manager, showGroup: $showGroup)
+}
+
+
+=======================================================================================
+For GroupingView.swift (basic structure suggestion):
+swift
+
+Copy
 struct GroupingView: View {
     @Binding var manager: StudentManager
     @Binding var showGroup: Bool
@@ -208,14 +199,12 @@ struct GroupingView: View {
         VStack {
             Text("Grouping!")
                 .font(.title)
-                .padding()
             
             if unassignedStudents.count >= 2 {
-                Text("\(unassignedStudents.count) students left for grouping")
+                Text("\(unassignedStudents.count) students left")
                 Button("Group Now!") {
-                    createGroups()
+                    performGrouping()
                 }
-                .padding()
             } else {
                 Text("Not enough student left for grouping!")
             }
@@ -224,29 +213,24 @@ struct GroupingView: View {
             
             List {
                 ForEach(groups.indices, id: \.self) { index in
-                    let group = groups[index]
-                    Text("Group \(index + 1): \(group.map { $0.name }.joined(separator: ", "))")
+                    Text("Group \(index + 1): \(groupMemberNames(for: groups[index]))")
                 }
             }
             .listStyle(.plain)
         }
+        .padding()
         .onAppear {
             unassignedStudents = manager.getStudents()
         }
     }
     
-    private mutating func createGroups() {
-        while unassignedStudents.count >= 2 {
-            if unassignedStudents.count <= 3 {
-                groups.append(unassignedStudents)
-                unassignedStudents.removeAll()
-            } else {
-                let randomIndex1 = Int.random(in: 0..<unassignedStudents.count)
-                let student1 = unassignedStudents.remove(at: randomIndex1)
-                let randomIndex2 = Int.random(in: 0..<unassignedStudents.count)
-                let student2 = unassignedStudents.remove(at: randomIndex2)
-                groups.append([student1, student2])
-            }
-        }
+    private func groupMemberNames(for group: [Student]) -> String {
+        group.map { $0.name }.joined(separator: ", ")
+    }
+
+=======================================================================================
+
+    private func performGrouping() {
+        // Implement grouping logic here
     }
 }
